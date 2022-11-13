@@ -3,7 +3,7 @@ import ssd1306
 import time
 import math
 import random
-import gcd
+import helpers
 
 i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
 
@@ -20,12 +20,12 @@ while True:
     # R = random.randint(26, 45)
     # r = random.randint(15, R)
     # d = random.randint(1, 50)
-    R = 66
-    r = 40
-    d = 19
+    R = 50
+    r = 35
+    d = 20
 
     dt = 0.05
-    maxT = 2 * math.pi * r / gcd.calc(R, r)
+    maxT = 2 * math.pi * r / helpers.gcd(R, r)
     theta = 0
 
     oled.fill(0)
