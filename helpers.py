@@ -1,3 +1,5 @@
+import math
+
 # least common multiple
 def gcd(a, b):
     if a % b == 0:
@@ -12,3 +14,7 @@ def gcd(a, b):
 # greatest common divisor
 def lcm(a, b):
     return a * b / gcd(a, b)
+
+def scale_value(value, in_min, in_max, out_min, out_max):
+  scaled_value = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+  return math.ceil(scaled_value)

@@ -5,7 +5,7 @@ import dht
 
 import ssd1306
 
-i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21))
+i2c = machine.SoftI2C(scl=machine.Pin(22), sda=machine.Pin(21))
 
 oled_width = 128
 oled_height = 64
@@ -17,24 +17,16 @@ import time
 ssid = 'overbye_main'
 password = '1234567890'
 
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>ESP32</title>
-    </head>
-    <body>
-        <h1>Hi from ESP32</h1>
-    </body>
-</html>
-"""
+h1 = "<h1>"
+h1c = "</h1>"
+br = "<br />"
 
 
 def do_connect():
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
         oled.fill(0)
-        oled.text('Connecting to Wi-Fi...', 20, 20)
+        oled.text('Connecting...', 0, 0, 1)
         oled.show()
         print('Connecting to Wi-Fi...')
         sta_if.active(True)
@@ -43,7 +35,9 @@ def do_connect():
             pass
 
     oled.fill(0)
-    oled.text(sta_if.ifconfig(), 20, 20)
+    oled.text('Connected', 0, 0, 1)
+    oled.text('IP:', 0, 10, 1)
+    oled.text(sta_if.ifconfig()[0], 0, 20, 1)
     oled.show()
     print('Network config:', sta_if.ifconfig())
 
@@ -67,7 +61,7 @@ while True:
     print('temperature', d.temperature())
     print('humidity', d.humidity())
 
-    response = 'temperature: ' + str(d.temperature()) + ', humidity: ' + str(d.humidity())
+    response = 'Temperature: ' + str(d.temperature()) + br + 'Humidity: ' + str(d.humidity())
     cl.send('HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n')
-    cl.send(response)
+    cl.send(h1 + response + h1c)
     cl.close()

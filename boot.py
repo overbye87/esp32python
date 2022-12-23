@@ -4,5 +4,5 @@
 # import webrepl
 # webrepl.start()
 
-import spirograph
-# import network
+# import spirograph
+import bluetooth
