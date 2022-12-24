@@ -1,3 +1,4 @@
+import json
 from machine import Pin
 from machine import Timer
 from machine import PWM
@@ -5,7 +6,8 @@ from time import sleep_ms
 import helpers
 import ubluetooth
 
-servo = PWM(Pin(13), freq=50, duty_ns=1500000)
+servo1 = PWM(Pin(27), freq=50, duty_ns=1600000)
+servo2 = PWM(Pin(26), freq=50, duty_ns=1600000)
 
 ble_msg = ""
 
@@ -94,7 +96,7 @@ prev_ble_msg = ''
 
 def buttons_irq(pin):
     led.value(not led.value())
-    ble.send('LED state will be toggled.')
+    # ble.send('LED state will be toggled.')
     print('LED state will be toggled.')
 
 
@@ -102,12 +104,19 @@ but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
 
 while True:
     if (bool(ble_msg) and ble_msg != prev_ble_msg):
-        duty_cycle = helpers.scale_value(int(ble_msg), -100, 100, 1000000, 2000000)
-        print(duty_cycle)
+        json_object = json.loads(ble_msg)
+        remote_data = helpers.RemoteData(**json_object)
+        var_x = remote_data.x
+        print('x =', var_x)
+        var_y = remote_data.y
+        print('y =', var_y)
+        duty_cycle1 = helpers.scale_value(int(var_x), -100, 100, 600000, 2600000)
+        duty_cycle2 = helpers.scale_value(int(var_y), -100, 100, 600000, 2600000)
         # 0 - 1023 50Hz = 20mc
         # 40 = 1ms / 20ms * 1023 = 51 @ 1000000
         # 117 = 2ms / 20ms * 1023 = 102 @ 2000000
-        servo.duty_ns(duty_cycle)
+        servo1.duty_ns(duty_cycle1)
+        servo2.duty_ns(duty_cycle2)
         prev_ble_msg = ble_msg
         ble_msg = ''
     sleep_ms(50)
