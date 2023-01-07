@@ -6,8 +6,26 @@ from time import sleep_ms
 import helpers
 import ubluetooth
 
-servo1 = PWM(Pin(27), freq=50, duty_ns=1600000)
-servo2 = PWM(Pin(26), freq=50, duty_ns=1600000)
+from dcmotor import DCMotor
+
+frequency = 15000
+
+m_left_enable = PWM(Pin(14), frequency)
+m_left_pin1 = Pin(26, Pin.OUT)
+m_left_pin2 = Pin(27, Pin.OUT)
+
+m_right_enable = PWM(Pin(25), frequency)
+m_right_pin1 = Pin(33, Pin.OUT)
+m_right_pin2 = Pin(32, Pin.OUT)
+
+dc_motor_left = DCMotor(m_left_pin1, m_left_pin2, m_left_enable)
+dc_motor_right = DCMotor(m_right_pin1, m_right_pin2, m_right_enable)
+
+dc_motor_left = DCMotor(m_left_pin1, m_left_pin2, m_left_enable, 0, 1023)
+dc_motor_right = DCMotor(m_right_pin1, m_right_pin2, m_right_enable, 0, 1023)
+
+# servo1 = PWM(Pin(27), freq=50, duty_ns=1600000)
+# servo2 = PWM(Pin(26), freq=50, duty_ns=1600000)
 
 ble_msg = ""
 
@@ -102,21 +120,42 @@ def buttons_irq(pin):
 
 but.irq(trigger=Pin.IRQ_FALLING, handler=buttons_irq)
 
+
+def set_motors_speed(var_l, var_r):
+    if var_l > 0:
+        dc_motor_left.forward(abs(var_l))
+    elif var_l < 0:
+        dc_motor_left.backwards(abs(var_l))
+    else:
+        dc_motor_left.stop()
+
+    if var_r > 0:
+        dc_motor_right.forward(abs(var_r))
+    elif var_r < 0:
+        dc_motor_right.backwards(abs(var_r))
+    else:
+        dc_motor_right.stop()
+
 while True:
     if (bool(ble_msg) and ble_msg != prev_ble_msg):
         json_object = json.loads(ble_msg)
         remote_data = helpers.RemoteData(**json_object)
-        var_x = remote_data.x
-        print('x =', var_x)
-        var_y = remote_data.y
-        print('y =', var_y)
-        duty_cycle1 = helpers.scale_value(int(var_x), -100, 100, 600000, 2600000)
-        duty_cycle2 = helpers.scale_value(int(var_y), -100, 100, 600000, 2600000)
+        print(ble_msg)
+        var_l = remote_data.l
+        var_r = remote_data.r
+
+        # print('l =', var_l)
+        # print('r =', var_r)
+
+        set_motors_speed(var_l, var_r)
+
+        # duty_cycle1 = helpers.scale_value(int(var_l), -100, 100, 600000, 2600000)
+        # duty_cycle2 = helpers.scale_value(int(var_r), -100, 100, 600000, 2600000)
         # 0 - 1023 50Hz = 20mc
         # 40 = 1ms / 20ms * 1023 = 51 @ 1000000
         # 117 = 2ms / 20ms * 1023 = 102 @ 2000000
-        servo1.duty_ns(duty_cycle1)
-        servo2.duty_ns(duty_cycle2)
+        # servo1.duty_ns(duty_cycle1)
+        # servo2.duty_ns(duty_cycle2)
         prev_ble_msg = ble_msg
         ble_msg = ''
     sleep_ms(50)
