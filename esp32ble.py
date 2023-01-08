@@ -10,7 +10,7 @@ class ESP32_BLE():
         # stable ON when connected
         self.led = Pin(2, Pin.OUT)
         self.timer1 = Timer(0)
-        self.ble_msg =''
+        self.ble_msg = ''
 
         self.name = name
         self.ble = ubluetooth.BLE()

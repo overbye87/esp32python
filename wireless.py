@@ -3,7 +3,7 @@ import socket
 import machine
 import dht
 
-import ssd1306
+import myssd1306
 
 i2c = machine.SoftI2C(scl=machine.Pin(22), sda=machine.Pin(21))
 

@@ -1,5 +1,5 @@
 import machine
-import ssd1306
+import myssd1306
 import time
 import math
 import random
